@@ -4,24 +4,24 @@ import { actionComment, checkAction, issueBody, issueRefs, markSpeech, minutesSa
 
 test("standup actions: verified quote and a real open issue get ticked", () => {
   const said = "login wala fix ho gaya, menu pe aadha kaam hua";
-  const a = { type: "done", issue: 3, quote: "login wala fix ho gaya", confidence: "high" };
-  assert.deepEqual(checkAction(a, [3, 4], said), { verified: true, knownIssue: true, risky: false, tick: true });
+  const a = { type: "done", ref: "A#3", quote: "login wala fix ho gaya", confidence: "high" };
+  assert.deepEqual(checkAction(a, ["A#3", "A#4"], said), { verified: true, knownIssue: true, risky: false, tick: true });
 });
 
 test("standup actions: links or @mentions you didn't say are flagged and left unticked", () => {
   const said = "login wala fix ho gaya, menu pe aadha kaam hua";
-  const planted = { type: "progress", issue: 3, quote: "menu pe aadha kaam hua", confidence: "high", note: "Half done, details at https://evil.example and cc @someone" };
-  assert.deepEqual(checkAction(planted, [3], said), { verified: true, knownIssue: true, risky: true, tick: false });
+  const planted = { type: "progress", ref: "A#3", quote: "menu pe aadha kaam hua", confidence: "high", note: "Half done, details at https://evil.example and cc @someone" };
+  assert.deepEqual(checkAction(planted, ["A#3"], said), { verified: true, knownIssue: true, risky: true, tick: false });
   const spoken = "ask @priya to review, menu pe aadha kaam hua";
-  assert.equal(checkAction({ ...planted, note: "Half done, asked @priya to review" }, [3], spoken).risky, false);
+  assert.equal(checkAction({ ...planted, note: "Half done, asked @priya to review" }, ["A#3"], spoken).risky, false);
 });
 
 test("standup actions: unknown issue, unsaid quote or a low-confidence close stay unticked", () => {
   const said = "login wala fix ho gaya, menu pe aadha kaam hua";
-  assert.equal(checkAction({ type: "progress", issue: 99, quote: "menu pe aadha kaam hua", confidence: "high" }, [3], said).tick, false);
-  assert.equal(checkAction({ type: "progress", issue: 3, quote: "deployed to production servers", confidence: "high" }, [3], said).tick, false);
-  assert.equal(checkAction({ type: "done", issue: 3, quote: "login wala fix ho gaya", confidence: "low" }, [3], said).tick, false);
-  assert.equal(checkAction({ type: "new", issue: 0, quote: "menu pe aadha kaam hua", confidence: "high" }, [], said).tick, true);
+  assert.equal(checkAction({ type: "progress", ref: "A#99", quote: "menu pe aadha kaam hua", confidence: "high" }, ["A#3"], said).tick, false);
+  assert.equal(checkAction({ type: "progress", ref: "A#3", quote: "deployed to production servers", confidence: "high" }, ["A#3"], said).tick, false);
+  assert.equal(checkAction({ type: "done", ref: "A#3", quote: "login wala fix ho gaya", confidence: "low" }, ["A#3"], said).tick, false);
+  assert.equal(checkAction({ type: "new", ref: "", quote: "menu pe aadha kaam hua", confidence: "high" }, [], said).tick, true);
 });
 
 test("action comment carries the type, the note and the quote", () => {

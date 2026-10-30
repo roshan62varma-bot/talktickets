@@ -8,13 +8,16 @@ import { HttpError } from "./lib/gemini.js";
 import { plan } from "./api/plan.js";
 import { share } from "./api/share.js";
 import { standup } from "./api/standup.js";
+import { callback, config, login } from "./lib/oauth.js";
 
 const ROOT = fileURLToPath(new URL(".", import.meta.url));
 const TYPES = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css" };
 const PORT = process.env.PORT || 5173;
 const API = { "/api/plan": plan, "/api/standup": standup, "/api/share": share };
+const AUTH = { "/api/auth/config": config, "/api/auth/login": login, "/api/auth/callback": callback };
 // Only these files are public; everything else (server code, .env, logs) is never served.
-const PUBLIC = new Set(["/index.html", "/app.js", "/style.css", "/lib/text.js", "/lib/github.js", "/lib/log.js"]);
+const PUBLIC = new Set(["/index.html", "/app.js", "/style.css", "/lib/text.js", "/lib/github.js", "/lib/log.js",
+  "/lib/commands.js", "/lib/work.js", "/lib/samples.js"]);
 
 createServer(async (req, res) => {
   const send = (status, body, type = "application/json") => {
@@ -22,6 +25,7 @@ createServer(async (req, res) => {
     res.end(typeof body === "string" ? body : JSON.stringify(body));
   };
   const path = req.url.split("?")[0];
+  if (AUTH[path]) return AUTH[path](req, res);
   const fn = API[path];
   if (fn) {
     if (req.method !== "POST") return send(405, { error: "POST only" });

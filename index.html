@@ -44,6 +44,11 @@
     <label class="field">Repository
       <input id="repo" placeholder="owner/repo or a github.com link" autocomplete="off" spellcheck="false">
     </label>
+    <div class="barside">
+    <label class="field lang">Write it in
+      <select id="lang"><option value="en">English</option><option value="hinglish">Hinglish</option></select>
+    </label>
+    <a id="signin" class="btn primary" href="/api/auth/login" hidden>Sign in with GitHub</a>
     <details id="tokenbox" class="tokenbox">
       <summary>GitHub token <span class="muted" id="tokenstate">not set: previews only</span></summary>
       <label class="field">Fine-grained token with Issues: read and write on this repository
@@ -53,6 +58,7 @@
       <div class="row"><button id="check" class="btn quiet">Check access</button><span class="status" id="access" role="status"></span></div>
       <p class="muted small">The token goes straight from your browser to GitHub. It never touches our server.</p>
     </details>
+    </div>
   </section>
 
   <nav class="tabs" role="tablist" aria-label="Modes">
@@ -111,8 +117,12 @@
   <main class="work" id="panel-standup" role="tabpanel" aria-labelledby="tab-standup" hidden>
     <section class="col said-col">
       <h2>What happened</h2>
+      <div id="s-nudges" class="nudges" hidden></div>
       <label class="field">Your standup
         <textarea id="s-transcript" class="spoken lined" rows="8" placeholder="Hold your Wispr key and say it like you would to a teammate: what got done, what's half way, what's stuck, anything new you found."></textarea>
+      </label>
+      <label class="field">Also update these repos <span class="muted">(optional, up to 3, comma separated)</span>
+        <input id="s-more" placeholder="owner/another-repo, owner/third-repo" autocomplete="off" spellcheck="false">
       </label>
       <div class="row">
         <button id="s-go" class="btn primary">Read my issues and propose updates</button>
@@ -168,6 +178,11 @@
         <p class="muted">Written only from issues that were closed or worked on in the period, and checked so they can't mention work that didn't happen.</p>
       </div>
       <div id="h-posts" class="stack"></div>
+      <div id="h-cardbox" class="post" hidden>
+        <div class="post-head"><h4>Progress card</h4>
+          <div class="row"><button id="h-svg" class="btn quiet copy">Download SVG</button><button id="h-png" class="btn quiet copy">Download PNG</button></div></div>
+        <div id="h-card" class="card"></div>
+      </div>
     </section>
   </main>
 
@@ -186,8 +201,21 @@
   </main>
 
   <footer class="foot">
-    Built by voice with <a href="https://wisprflow.ai" target="_blank" rel="noopener">Wispr Flow</a> for the WeMakeDevs No Hands challenge. Shortcut: <kbd>Ctrl</kbd> + <kbd>Enter</kbd> runs the box you're typing in.
+    <p>Built by voice with <a href="https://wisprflow.ai" target="_blank" rel="noopener">Wispr Flow</a> for the WeMakeDevs No Hands challenge.
+      <kbd>Ctrl</kbd> + <kbd>K</kbd> opens the command bar, <kbd>Ctrl</kbd> + <kbd>Enter</kbd> runs the box you're in.</p>
+    <p><b>Privacy.</b> What you say is sent to Google's Gemini API to write the tickets, updates and posts, and isn't stored by TalkTickets.
+      Your GitHub token stays in your browser and goes only to GitHub. The voice log and the undo history live only in this browser.</p>
   </footer>
+
+  <form class="cmd" id="cmd" autocomplete="off" aria-label="Hands-free command bar">
+    <label for="cmd-in" class="cmd-label">Say a command</label>
+    <input id="cmd-in" placeholder="Hold your Wispr key: “switch to standup”, “apply one and three”, “undo”…" spellcheck="false">
+    <button class="btn primary" type="submit">Do it</button>
+    <button class="btn quiet" type="button" id="undo" hidden>Undo last changes</button>
+    <button class="btn quiet" type="button" id="cmd-help" aria-expanded="false">Commands</button>
+    <p class="cmd-out" id="cmd-out" role="status"></p>
+    <ul class="cmd-list" id="cmd-list" hidden></ul>
+  </form>
 
   <script type="module" src="app.js"></script>
 </body>
