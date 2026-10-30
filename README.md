@@ -77,6 +77,7 @@ The whole flow, from talking to approving to posting, works without touching the
 - Nothing reaches GitHub until you tick it and press the button. Without a token, everything is a preview.
 
 ## Try it
+- **Live:** https://talktickets.vercel.app (samples: https://talktickets.vercel.app/?sample, `/?sample#standup`, `/?sample#share`)
 - **Samples** (a made-up hostel mess-menu app; nothing touches GitHub): add `?sample` to the link, optionally with
   `#standup` or `#share`, e.g. `/?sample#standup`. Each tab also has a **Load the sample** button.
 - **Your own repo:** paste it at the top, add a fine-grained token (Issues: read and write on that repo), and talk.

@@ -1,7 +1,7 @@
 // Browser check: drives TalkTickets in a headless Chromium browser over the DevTools protocol and checks every feature,
 // including GitHub writes and undo against a fake GitHub (nothing real is touched). Needs the app running on :5173
 // with GEMINI_API_KEY set (the live standup and Hinglish plan steps call the real AI).
-// Run: BROWSER="path/to/chrome-or-edge" node scripts/browser-check.mjs
+// Run: BROWSER="path/to/chrome-or-edge" BASE="https://your-site" node scripts/browser-check.mjs
 import { spawn } from "node:child_process";
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -51,7 +51,7 @@ try {
   await connect();
   await send("Page.enable");
   await send("Runtime.enable");
-  const B = "http://localhost:5173";
+  const B = process.env.BASE || "http://localhost:5173";
 
   // ---------- PLAN: instant sample, duplicate, steps, assignee ----------
   await go(`${B}/?sample`);
