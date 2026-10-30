@@ -1,6 +1,37 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { issueBody, markSpeech, parseRepo, quoteFound } from "../lib/text.js";
+import { actionComment, checkAction, issueBody, issueRefs, markSpeech, minutesSaved, parseRepo, quoteFound, unknownRefs, wordCount } from "../lib/text.js";
+
+test("standup actions: verified quote and a real open issue get ticked", () => {
+  const said = "login wala fix ho gaya, menu pe aadha kaam hua";
+  const a = { type: "done", issue: 3, quote: "login wala fix ho gaya", confidence: "high" };
+  assert.deepEqual(checkAction(a, [3, 4], said), { verified: true, knownIssue: true, tick: true });
+});
+
+test("standup actions: unknown issue, unsaid quote or a low-confidence close stay unticked", () => {
+  const said = "login wala fix ho gaya, menu pe aadha kaam hua";
+  assert.equal(checkAction({ type: "progress", issue: 99, quote: "menu pe aadha kaam hua", confidence: "high" }, [3], said).tick, false);
+  assert.equal(checkAction({ type: "progress", issue: 3, quote: "deployed to production servers", confidence: "high" }, [3], said).tick, false);
+  assert.equal(checkAction({ type: "done", issue: 3, quote: "login wala fix ho gaya", confidence: "low" }, [3], said).tick, false);
+  assert.equal(checkAction({ type: "new", issue: 0, quote: "menu pe aadha kaam hua", confidence: "high" }, [], said).tick, true);
+});
+
+test("action comment carries the type, the note and the quote", () => {
+  const c = actionComment({ type: "blocked", note: "Waiting on the database choice.", quote: "database decide nahi hua" });
+  assert.match(c, /^\*\*Blocked:\*\* Waiting on the database choice\./);
+  assert.match(c, /From the standup: "database decide nahi hua"/);
+});
+
+test("posts: issue references are found and unknown ones flagged", () => {
+  assert.deepEqual(issueRefs("Closed #3 and #12, then #3 again"), [3, 12]);
+  assert.deepEqual(unknownRefs("Shipped #3 and #40", [3, 4]), [40]);
+});
+
+test("word count and the typing estimate", () => {
+  assert.equal(wordCount("  one two\nthree "), 3);
+  assert.ok(Math.abs(minutesSaved(150) - 2.75) < 1e-9); // 150 words: 3.75 min typing - 1 min speaking
+  assert.equal(minutesSaved(0), 0);
+});
 
 test("fillers and repeats are marked, real words kept", () => {
   const { parts, fillers, repeats } = markSpeech("Okay so, um, record the the demo, matlab today");

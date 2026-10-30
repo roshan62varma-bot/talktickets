@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>TalkTickets</title>
-  <meta name="description" content="Talk through the plan. Get the GitHub issues, each one traced back to your own words.">
+  <meta name="description" content="Plan, standup and share by voice. TalkTickets keeps your GitHub issues up to date from what you say, and traces every change back to your own words.">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect x='4' y='14' width='56' height='36' rx='6' fill='%2318213B'/><circle cx='22' cy='14' r='5' fill='%23E8EDF5'/><circle cx='22' cy='50' r='5' fill='%23E8EDF5'/><rect x='30' y='26' width='22' height='4' rx='2' fill='%23FFE25C'/><rect x='30' y='34' width='14' height='4' rx='2' fill='%23E8EDF5'/></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -21,32 +21,53 @@
   </header>
 
   <section class="hero">
-    <h1>Talk through the plan.<br>Get the tickets.</h1>
-    <p class="lede">Hold your Wispr Flow key and ramble about what needs doing. TalkTickets turns it into GitHub issues, and every one is traced back to your own words.</p>
+    <h1>Talk through the work.<br>GitHub keeps up.</h1>
+    <p class="lede">Say the plan and get issues. Say your standup and they close, move and get flagged. Say nothing and it still writes the weekly update. Every change is traced back to your own words.</p>
 
-    <figure class="demo" aria-label="Example: a spoken sentence becomes a ticket">
+    <figure class="demo" aria-label="Example: a spoken standup becomes updates">
       <blockquote class="said">
-        <span class="f">okay so, um,</span> the login button gets cut off on mobile, <span class="f">the</span> the whole thing, <span class="f">matlab</span> fix it by Friday
+        <span class="f">okay so, um,</span> the login fix is done, <span class="f">the</span> the menu page is half way, <span class="f">matlab</span> ratings are stuck on the database
       </blockquote>
       <div class="becomes" aria-hidden="true"></div>
       <div class="stub mini">
-        <div class="stub-l"><b>1</b><span class="pri p1">P1</span></div>
-        <div class="stub-r">
-          <strong>Fix login button cut off on mobile</strong>
-          <span class="due">Due Friday</span>
-        </div>
+        <div class="stub-l"><span class="kind done">Done</span></div>
+        <div class="stub-r"><strong>#3 Fix login button cut off on mobile</strong><span class="due">Closed with a note</span></div>
+      </div>
+      <div class="stub mini">
+        <div class="stub-l"><span class="kind blocked">Blocked</span></div>
+        <div class="stub-r"><strong>#5 Add meal ratings</strong><span class="due">Waiting on the database choice</span></div>
       </div>
     </figure>
   </section>
 
-  <main class="work">
-    <section class="col said-col" aria-labelledby="h-said">
-      <h2 id="h-said">What you said</h2>
-      <label class="field">Repository
-        <input id="repo" placeholder="owner/repo or a github.com link" autocomplete="off" spellcheck="false">
+  <section class="bar" aria-label="Repository and access">
+    <label class="field">Repository
+      <input id="repo" placeholder="owner/repo or a github.com link" autocomplete="off" spellcheck="false">
+    </label>
+    <details id="tokenbox" class="tokenbox">
+      <summary>GitHub token <span class="muted" id="tokenstate">not set: previews only</span></summary>
+      <label class="field">Fine-grained token with Issues: read and write on this repository
+        <input id="token" type="password" placeholder="github_pat_…" autocomplete="off" spellcheck="false">
       </label>
+      <label class="check"><input type="checkbox" id="remember"> Remember it in this browser</label>
+      <div class="row"><button id="check" class="btn quiet">Check access</button><span class="status" id="access" role="status"></span></div>
+      <p class="muted small">The token goes straight from your browser to GitHub. It never touches our server.</p>
+    </details>
+  </section>
+
+  <nav class="tabs" role="tablist" aria-label="Modes">
+    <button role="tab" id="tab-plan" aria-controls="panel-plan" aria-selected="true">Plan<span>say what needs doing</span></button>
+    <button role="tab" id="tab-standup" aria-controls="panel-standup" aria-selected="false">Standup<span>say what happened</span></button>
+    <button role="tab" id="tab-share" aria-controls="panel-share" aria-selected="false">Share<span>post the progress</span></button>
+    <button role="tab" id="tab-log" aria-controls="panel-log" aria-selected="false">Voice log<span>everything you said</span></button>
+  </nav>
+
+  <!-- PLAN -->
+  <main class="work" id="panel-plan" role="tabpanel" aria-labelledby="tab-plan">
+    <section class="col said-col">
+      <h2>What you said</h2>
       <label class="field">Your plan
-        <textarea id="transcript" rows="9" placeholder="Click here, hold your Wispr Flow key and talk: what needs doing, in any order. Rambling, Hinglish and “um” are all fine."></textarea>
+        <textarea id="transcript" class="spoken lined" rows="9" placeholder="Click here, hold your Wispr Flow key and talk: what needs doing, in any order. Rambling, Hinglish and “um” are all fine."></textarea>
       </label>
       <div class="row">
         <button id="go" class="btn primary">Make tickets</button>
@@ -56,35 +77,27 @@
       <div id="speech" class="heard" hidden></div>
     </section>
 
-    <section class="col tickets-col" aria-labelledby="h-tickets">
-      <h2 id="h-tickets">Tickets</h2>
+    <section class="col">
+      <h2>Tickets</h2>
       <div id="empty" class="empty">
         <p>Your tickets land here.</p>
         <p class="muted">Say what needs doing on the left, then press <b>Make tickets</b>. Nothing reaches GitHub until you pick the tickets and create them.</p>
       </div>
-      <div id="tickets"></div>
+      <div id="tickets" class="stack"></div>
 
       <div id="ask" class="ask" hidden>
         <h3>A few things you didn't say</h3>
         <ul id="questions"></ul>
-        <textarea id="answers" rows="3" placeholder="Answer by voice: hold your Wispr key and talk."></textarea>
+        <textarea id="answers" class="spoken" rows="3" placeholder="Answer by voice: hold your Wispr key and talk."></textarea>
         <button id="answer" class="btn primary">Update tickets</button>
       </div>
 
       <div id="changebox" class="change" hidden>
-        <textarea id="instruction" rows="2" placeholder="Want a change? Say it: “make ticket 2 a P1”, “merge 3 into 1”."></textarea>
+        <textarea id="instruction" class="spoken" rows="2" placeholder="Want a change? Say it: “make ticket 2 a P1”, “merge 3 into 1”."></textarea>
         <button id="change" class="btn quiet">Apply change</button>
       </div>
 
       <div id="step-ship" class="ship" hidden>
-        <details id="tokenbox">
-          <summary>GitHub token <span class="muted" id="tokenstate">not set, so this is a dry run</span></summary>
-          <label class="field">Fine-grained token with Issues: read and write on this repository
-            <input id="token" type="password" placeholder="github_pat_…" autocomplete="off" spellcheck="false">
-          </label>
-          <label class="check"><input type="checkbox" id="remember"> Remember it in this browser</label>
-          <p class="muted small">The token goes straight from your browser to GitHub. It never touches our server.</p>
-        </details>
         <div class="row">
           <button id="create" class="btn primary big">Create issues</button>
           <span class="status" id="shipstatus" role="status"></span>
@@ -94,8 +107,86 @@
     </section>
   </main>
 
+  <!-- STANDUP -->
+  <main class="work" id="panel-standup" role="tabpanel" aria-labelledby="tab-standup" hidden>
+    <section class="col said-col">
+      <h2>What happened</h2>
+      <label class="field">Your standup
+        <textarea id="s-transcript" class="spoken lined" rows="8" placeholder="Hold your Wispr key and say it like you would to a teammate: what got done, what's half way, what's stuck, anything new you found."></textarea>
+      </label>
+      <div class="row">
+        <button id="s-go" class="btn primary">Read my issues and propose updates</button>
+        <button id="s-sample" class="btn quiet">Load the sample</button>
+      </div>
+      <p class="status" id="s-status" role="status"></p>
+      <div id="s-speech" class="heard" hidden></div>
+    </section>
+
+    <section class="col">
+      <h2>Updates</h2>
+      <div id="s-empty" class="empty">
+        <p>Proposed updates land here.</p>
+        <p class="muted">TalkTickets reads your open issues, matches what you said to them, and proposes a close, a comment, a <b>blocked</b> or <b>in-progress</b> label, or a new issue. You pick which ones happen.</p>
+      </div>
+      <p id="s-summary" class="summary" hidden></p>
+      <div id="s-actions" class="stack"></div>
+      <div id="s-ship" class="ship" hidden>
+        <div class="row">
+          <button id="s-apply" class="btn primary big">Apply updates</button>
+          <span class="status" id="s-shipstatus" role="status"></span>
+        </div>
+        <ul id="s-done" class="created"></ul>
+      </div>
+    </section>
+  </main>
+
+  <!-- SHARE -->
+  <main class="work" id="panel-share" role="tabpanel" aria-labelledby="tab-share" hidden>
+    <section class="col said-col">
+      <h2>What to share</h2>
+      <fieldset class="seg">
+        <legend>Period</legend>
+        <label><input type="radio" name="days" value="1"> Today</label>
+        <label><input type="radio" name="days" value="7" checked> This week</label>
+        <label><input type="radio" name="days" value="14"> Two weeks</label>
+      </fieldset>
+      <label class="field">Anything to highlight? <span class="muted">(optional, by voice)</span>
+        <textarea id="h-note" class="spoken" rows="3" placeholder="“Lead with the login fix, people kept complaining about it.”"></textarea>
+      </label>
+      <div class="row">
+        <button id="h-go" class="btn primary">Write the posts</button>
+        <button id="h-sample" class="btn quiet">Use sample activity</button>
+      </div>
+      <p class="status" id="h-status" role="status"></p>
+      <div id="h-activity" class="activity" hidden></div>
+    </section>
+
+    <section class="col">
+      <h2>Posts</h2>
+      <div id="h-empty" class="empty">
+        <p>Your progress posts land here.</p>
+        <p class="muted">Written only from issues that were closed or worked on in the period, and checked so they can't mention work that didn't happen.</p>
+      </div>
+      <div id="h-posts" class="stack"></div>
+    </section>
+  </main>
+
+  <!-- LOG -->
+  <main class="work single" id="panel-log" role="tabpanel" aria-labelledby="tab-log" hidden>
+    <section class="col">
+      <h2>Voice log</h2>
+      <p class="muted">Every run in this browser: what you said and what it changed. Export it as proof of work.</p>
+      <div id="l-totals" class="totals"></div>
+      <div class="row">
+        <button id="l-export" class="btn primary">Download as Markdown</button>
+        <button id="l-clear" class="btn quiet">Clear the log</button>
+      </div>
+      <ol id="l-list" class="log"></ol>
+    </section>
+  </main>
+
   <footer class="foot">
-    Built by voice with <a href="https://wisprflow.ai" target="_blank" rel="noopener">Wispr Flow</a> for the WeMakeDevs No Hands challenge.
+    Built by voice with <a href="https://wisprflow.ai" target="_blank" rel="noopener">Wispr Flow</a> for the WeMakeDevs No Hands challenge. Shortcut: <kbd>Ctrl</kbd> + <kbd>Enter</kbd> runs the box you're typing in.
   </footer>
 
   <script type="module" src="app.js"></script>
