@@ -84,7 +84,11 @@ The whole flow, from talking to approving to posting, works without touching the
 - `Ctrl` + `Enter` runs the box you're typing in. Arrow keys switch tabs. Press `?` (or say "show shortcuts") for the full list.
 
 ## The result it produced
-<!-- Add links to the real issues, standup updates and post TalkTickets made from your voice. -->
+TalkTickets planned and tracked its own last features, on this repo, by voice:
+- **Plan** (one spoken plan → four issues): [#1 Add Tamil as an output language](https://github.com/roshan62varma-bot/talktickets/issues/1), [#2 Add keyboard shortcuts help panel](https://github.com/roshan62varma-bot/talktickets/issues/2), [#3 Check the whole app on phone](https://github.com/roshan62varma-bot/talktickets/issues/3), [#4 Record the demo video](https://github.com/roshan62varma-bot/talktickets/issues/4).
+- **The work:** [`6fa300e`](https://github.com/roshan62varma-bot/talktickets/commit/6fa300e) (Fixes #1) and [`b1a4576`](https://github.com/roshan62varma-bot/talktickets/commit/b1a4576) (Fixes #2). GitHub closed both issues on push; I reopened them so the standup could close them.
+- **Standup** (one spoken update): closed #1 and #2 with a note and "Code agrees" commit evidence, marked #3 in progress, and commented on #4.
+- **Share:** the week's X post, LinkedIn post and changelog, written from that activity (2 closed, 3 open).
 
 ## How I used Wispr Flow
 <!-- Fill in honestly before submitting: what you dictated, and roughly how much. -->
