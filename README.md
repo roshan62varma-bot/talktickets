@@ -118,7 +118,7 @@ Requires Node 18+ and a free [Gemini API key](https://aistudio.google.com/apikey
 ```bash
 GEMINI_API_KEY=your_key node dev-server.js     # http://localhost:5173
 npm test                                    # 30 tests: commands, truth guard, checklists, nudges, evidence, card, API flows (fake AI), OAuth
-node scripts/browser-check.mjs              # 45 checks in a real headless browser, including GitHub writes + undo against a fake GitHub
+node scripts/browser-check.mjs              # 43 checks in a real headless browser, including GitHub writes + undo against a fake GitHub
 node scripts/make-samples.js                # refresh the saved sample answers
 ```
 
