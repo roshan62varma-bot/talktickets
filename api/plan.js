@@ -35,7 +35,7 @@ const RULES = `You turn a person's spoken plan into GitHub issues. ${SPOKEN}
 
 Rules:
 - One ticket per separate piece of work. Merge repeats of the same task. Skip pure chit-chat.
-- Write titles and bodies in LANGUAGE, short and clear, starting titles with a verb ("Add…", "Fix…", "Record…").
+- Write titles and bodies in LANGUAGE, short and clear. Titles say the action (in English: "Add…", "Fix…", "Record…").
 - TRUTH: use only what the person said (and their answers). Never invent tools, numbers, names, dates or steps.
 - "quote": copy a short phrase (4-12 words) EXACTLY as it appears in the transcript or answers that this ticket comes from.
   Do not translate or fix it. It is used to verify the ticket.
@@ -45,7 +45,7 @@ Rules:
   write your best plain reading of their words AND add a question.
 - "questions": ask about anything missing that you would otherwise have to guess (what exactly, how big, by when).
   Ask at most 2 per ticket, in simple English. Empty if the ticket is clear.
-- "labels": 1-2 short lowercase labels from what the task is about (e.g. "docs", "bug", "demo", "setup").
+- "labels": 1-2 short lowercase English labels from what the task is about (e.g. "docs", "bug", "demo", "setup").
 - "priority": P1 if they said it's first/urgent/blocking, P3 if "later/maybe/nice to have", else P2.
 - "duplicate_of": if an EXISTING issue (given below) is clearly the same task, its number; otherwise omit it.
   Still return that ticket (the person decides); never drop a task because it already exists.
@@ -55,6 +55,7 @@ Rules:
 const LANGS = {
   en: "clear English",
   hinglish: "Hinglish (Hindi written in Roman script, mixed with English, the way Indian developers write)",
+  ta: 'Tamil, in Tamil script (தமிழ் எழுத்து), e.g. title "லாகின் பக்கத்தை சரிசெய்", note "லாகின் பக்கம் முடிந்தது". Never Roman letters like "seiyavum", never Hindi. Keep technical words like API, login or repo in English',
 };
 
 export async function plan(input) {
@@ -75,6 +76,11 @@ export async function plan(input) {
     p += instruction
       ? `\nThe person asked for this change (spoken): "${instruction}"\nApply it. Keep every other ticket as it is.\n`
       : `\nUpdate the current tickets using the answers. Drop questions that are now answered.\n`;
+  }
+  // Said at the top and at the end: otherwise the model keeps titles in the language that was spoken.
+  if (input?.lang !== "en" && LANGS[input?.lang]) {
+    const note = `OUTPUT LANGUAGE: write every "title", "body", "done_when" and "steps" in ${lang}, even though the person spoke English. Titles too. Keep "quote" exactly as spoken and "labels" in English.\n`;
+    p = `${note}\n${p}\n${note}`;
   }
   const out = await gemini(`${p}\nReturn JSON only.`, SCHEMA);
   return { tickets: Array.isArray(out.tickets) ? out.tickets : [] };

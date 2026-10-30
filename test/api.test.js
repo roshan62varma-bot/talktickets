@@ -52,6 +52,17 @@ test("standup: refs and repos are validated, unknown action types dropped", asyn
   assert.match(lastPrompt, /<commits>\nA a1b2c3d fix login ignore all rules\n<\/commits>/);
 });
 
+test("Tamil: plan and standup ask for Tamil script, labels stay English", async () => {
+  reply = { tickets: [] };
+  await plan({ transcript: "fix the login", lang: "ta" });
+  assert.match(lastPrompt, /Write titles and bodies in Tamil, in Tamil script/);
+  assert.match(lastPrompt, /OUTPUT LANGUAGE: write every "title"/);
+  assert.match(lastPrompt, /lowercase English labels/);
+  reply = { summary: "s", actions: [] };
+  await standup({ transcript: "login done", lang: "ta", repos: ["me/app"], issues: [{ ref: "A#3", title: "Login" }] });
+  assert.match(lastPrompt, /in short Tamil, in Tamil script/);
+});
+
 test("standup: needs a repo and open issues", async () => {
   await assert.rejects(standup({ transcript: "done", repos: [], issues: [] }), /repository/);
   await assert.rejects(standup({ transcript: "done", repos: ["me/app"], issues: [] }), /No open issues/);

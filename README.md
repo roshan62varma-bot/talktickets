@@ -64,7 +64,7 @@ Fixed at the bottom of the page (`Ctrl` + `K`). Hold your Wispr key and say what
 The whole flow, from talking to approving to posting, works without touching the mouse. Unknown commands are refused with the list of what it understands. It never guesses.
 
 ### Also
-- **Write it in English or Hinglish.** Your quotes stay exactly as you said them.
+- **Write it in English, Hinglish or Tamil.** Tickets and standup updates come out in the language you pick; your quotes stay exactly as you said them.
 - **Sign in with GitHub** (OAuth). It appears when the server has a GitHub OAuth app set up; otherwise paste a fine-grained token.
 - **Instant samples.** The sample's AI answers are saved in `lib/samples.js`, so the demo works instantly and never hits the AI quota.
 
