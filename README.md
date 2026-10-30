@@ -6,7 +6,7 @@ Plan, standup and share by voice. TalkTickets keeps your GitHub issues up to dat
 change back to your own words. Made to be used hands-free with [Wispr Flow](https://wisprflow.ai), for the WeMakeDevs
 **No Hands** challenge (Builders track).
 
-**Demo video (under 2 minutes):** see the submission. **Live:** https://talktickets.vercel.app
+**Demo video (1:59):** https://youtu.be/UD6z-SdBPl0 · **Live:** https://talktickets.vercel.app
 
 ## The problem
 I'm a student running two or three projects and hackathons at once. Issues are the easy part. Keeping them **up to
