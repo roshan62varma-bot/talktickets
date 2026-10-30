@@ -75,6 +75,27 @@ try {
   out = await cmd("the weather is nice");
   check("unknown command is refused with help", /didn't catch/.test(out));
 
+  // ---------- SHORTCUTS PANEL and TAMIL option ----------
+  const key = async (k, code) => {
+    await send("Input.dispatchKeyEvent", { type: "keyDown", key: k, code, text: k.length === 1 ? k : undefined, windowsVirtualKeyCode: k === "Escape" ? 27 : 191 });
+    await send("Input.dispatchKeyEvent", { type: "keyUp", key: k, code });
+    await sleep(200);
+  };
+  const keysOpen = () => js(`return document.getElementById("keys").open`);
+  await js(`document.getElementById("transcript").focus()`);
+  await key("?", "Slash");
+  check("'?' while typing in a box does not open the shortcuts", !(await keysOpen()));
+  await js(`document.activeElement.blur()`);
+  await key("?", "Slash");
+  check("'?' opens the shortcuts panel", await keysOpen());
+  check("the panel lists Ctrl + K", /Ctrl\s*\+\s*K/.test(await js(`return document.getElementById("keys").innerText`)));
+  await key("Escape", "Escape");
+  check("Esc closes the shortcuts panel", !(await keysOpen()));
+  out = await cmd("show shortcuts");
+  check("command 'show shortcuts' opens the panel", await keysOpen(), out);
+  await js(`document.getElementById("keys").close()`);
+  check("Tamil is an output language", await js(`return [...document.getElementById("lang").options].some(o => o.value === "ta" && /Tamil/.test(o.text))`));
+
   // ---------- STANDUP: nudges, multi-repo, evidence, checklist, assignee ----------
   out = await cmd("switch to standup");
   check("command switches tab", await js(`return !document.getElementById("panel-standup").hidden`), out);

@@ -202,10 +202,24 @@
 
   <footer class="foot">
     <p>Built by voice with <a href="https://wisprflow.ai" target="_blank" rel="noopener">Wispr Flow</a> for the WeMakeDevs No Hands challenge.
-      <kbd>Ctrl</kbd> + <kbd>K</kbd> opens the command bar, <kbd>Ctrl</kbd> + <kbd>Enter</kbd> runs the box you're in.</p>
+      <button class="btn quiet small" type="button" id="keys-open">Keyboard shortcuts <kbd>?</kbd></button></p>
     <p><b>Privacy.</b> What you say is sent to Google's Gemini API to write the tickets, updates and posts, and isn't stored by TalkTickets.
       Your GitHub token stays in your browser and goes only to GitHub. The voice log and the undo history live only in this browser.</p>
   </footer>
+
+  <dialog id="keys" class="keys" aria-labelledby="keys-title">
+    <h2 id="keys-title">Keyboard shortcuts</h2>
+    <dl>
+      <dt><kbd>?</kbd></dt><dd>Open this panel (when you're not typing in a box)</dd>
+      <dt><kbd>Ctrl</kbd> + <kbd>K</kbd></dt><dd>Jump to the command bar</dd>
+      <dt><kbd>Enter</kbd></dt><dd>Run what's in the command bar</dd>
+      <dt><kbd>Ctrl</kbd> + <kbd>Enter</kbd></dt><dd>Run the box you're typing in: make tickets, read my issues, write the posts</dd>
+      <dt><kbd>←</kbd> <kbd>→</kbd></dt><dd>Switch tabs, when a tab has focus</dd>
+      <dt><kbd>Esc</kbd></dt><dd>Close this panel</dd>
+    </dl>
+    <p class="muted small">On a Mac, use <kbd>⌘</kbd> instead of <kbd>Ctrl</kbd>. You can also say “show shortcuts” in the command bar.</p>
+    <form method="dialog"><button class="btn primary" id="keys-close">Close</button></form>
+  </dialog>
 
   <form class="cmd" id="cmd" autocomplete="off" aria-label="Hands-free command bar">
     <label for="cmd-in" class="cmd-label">Say a command</label>

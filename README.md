@@ -59,7 +59,7 @@ Fixed at the bottom of the page (`Ctrl` + `K`). Hold your Wispr key and say what
 - *"switch to standup"*, *"make tickets"*, *"read my issues"*
 - *"apply one and three"*, *"apply all"*, *"skip two"*, *"tick 4"* (English or Hindi numbers: *"ek aur teen"*)
 - *"answer: the blog is about OfferRoom"*, *"change: make ticket 2 a P1"*
-- *"this week"*, *"copy the X post"*, *"undo"*, *"load the sample"*, *"check access"*, *"download the log"*
+- *"this week"*, *"copy the X post"*, *"undo"*, *"load the sample"*, *"check access"*, *"download the log"*, *"show shortcuts"*
 
 The whole flow, from talking to approving to posting, works without touching the mouse. Unknown commands are refused with the list of what it understands. It never guesses.
 
@@ -81,7 +81,7 @@ The whole flow, from talking to approving to posting, works without touching the
 - **Samples** (a made-up hostel mess-menu app; nothing touches GitHub): add `?sample` to the link, optionally with
   `#standup` or `#share`, e.g. `/?sample#standup`. Each tab also has a **Load the sample** button.
 - **Your own repo:** paste it at the top, add a fine-grained token (Issues: read and write on that repo), and talk.
-- `Ctrl` + `Enter` runs the box you're typing in. Arrow keys switch tabs.
+- `Ctrl` + `Enter` runs the box you're typing in. Arrow keys switch tabs. Press `?` (or say "show shortcuts") for the full list.
 
 ## The result it produced
 <!-- Add links to the real issues, standup updates and post TalkTickets made from your voice. -->
@@ -95,8 +95,8 @@ Requires Node 18+ and a free [Gemini API key](https://aistudio.google.com/apikey
 
 ```bash
 GEMINI_API_KEY=your_key node dev-server.js     # http://localhost:5173
-npm test                                    # 29 tests: commands, truth guard, checklists, nudges, evidence, card, API flows (fake AI), OAuth
-node scripts/browser-check.mjs              # 39 checks in a real headless browser, including GitHub writes + undo against a fake GitHub
+npm test                                    # 30 tests: commands, truth guard, checklists, nudges, evidence, card, API flows (fake AI), OAuth
+node scripts/browser-check.mjs              # 45 checks in a real headless browser, including GitHub writes + undo against a fake GitHub
 node scripts/make-samples.js                # refresh the saved sample answers
 ```
 

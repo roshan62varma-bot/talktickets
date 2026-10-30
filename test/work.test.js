@@ -17,6 +17,9 @@ test("commands: the everyday ones", () => {
   assert.deepEqual(parseCommand("go to the voice log"), { action: "tab", tab: "log" });
   assert.deepEqual(parseCommand("make tickets"), { action: "run" });
   assert.deepEqual(parseCommand("read my issues"), { action: "run" });
+  assert.deepEqual(parseCommand("Show shortcuts."), { action: "keys" });
+  assert.deepEqual(parseCommand("what are the keyboard shortcuts"), { action: "keys" });
+  assert.deepEqual(parseCommand("show the commands"), { action: "help" });
   assert.deepEqual(parseCommand("Apply one and three."), { action: "apply", numbers: [1, 3] });
   assert.deepEqual(parseCommand("create all of them"), { action: "apply", all: true });
   assert.deepEqual(parseCommand("apply"), { action: "apply" });

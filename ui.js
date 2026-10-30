@@ -106,11 +106,16 @@ document.querySelector(".tabs").addEventListener("keydown", (e) => {
   if (next >= 0) { showTab(TABS[next]); $(`tab-${TABS[next]}`).focus(); }
 });
 
-// Ctrl/Cmd+Enter runs the button that belongs to the box you're in; Ctrl+K opens the command bar.
+// Ctrl/Cmd+Enter runs the button that belongs to the box you're in; Ctrl+K opens the command bar; "?" shows the shortcuts.
 const RUNS = { transcript: "go", answers: "answer", instruction: "change", "s-transcript": "s-go", "h-note": "h-go" };
+const typing = (el) => el.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName);
+const showKeys = () => { if (!$("keys").open) $("keys").showModal(); };
+$("keys-open").onclick = showKeys;
+$("keys").addEventListener("click", (e) => { if (e.target === $("keys")) $("keys").close(); }); // click outside closes
 document.addEventListener("keydown", (e) => {
   if (e.key === "Enter" && (e.ctrlKey || e.metaKey) && RUNS[e.target.id]) { e.preventDefault(); $(RUNS[e.target.id]).click(); }
-  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") { e.preventDefault(); $("cmd-in").focus(); }
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") { e.preventDefault(); $("keys").close(); $("cmd-in").focus(); }
+  if (e.key === "?" && !e.ctrlKey && !e.metaKey && !e.altKey && !typing(e.target)) { e.preventDefault(); showKeys(); }
 });
 
 // ---------- GitHub sign-in (only when the server has it set up) ----------
@@ -735,6 +740,7 @@ function runCommand(text) {
     case "access": $("tokenbox").open = true; $("check").click(); return say("Checking access.", "ok");
     case "export": $("l-export").click(); return say("Downloaded the voice log.", "ok");
     case "help": $("cmd-list").hidden = false; return say("Here's what you can say.", "ok");
+    case "keys": showKeys(); return say("Showing the keyboard shortcuts. Esc closes them.", "ok");
     default:
       $("cmd-list").hidden = false;
       return say(`I didn't catch a command in “${text.slice(0, 60)}”. Try one of these.`, "err");
