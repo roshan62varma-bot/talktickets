@@ -290,6 +290,7 @@ function actionHTML(a, i) {
       <p class="body">${esc(a.note)}</p>
       <div class="facts"><span>${KIND[a.type].what}</span>${conf}${(a.labels || []).map((l) => `<span class="tag">${esc(l)}</span>`).join("")}</div>
       <p class="trace ${a.verified ? "ok" : "bad"}">${a.verified ? "You said" : "Not found in what you said"}: <q>${esc(a.quote)}</q></p>
+      ${a.risky ? `<p class="trace bad">This note has a link or @mention you didn't say. It may come from text inside an issue. Check it before ticking.</p>` : ""}
     </div>
   </article>`;
 }

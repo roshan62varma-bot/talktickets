@@ -5,7 +5,15 @@ import { actionComment, checkAction, issueBody, issueRefs, markSpeech, minutesSa
 test("standup actions: verified quote and a real open issue get ticked", () => {
   const said = "login wala fix ho gaya, menu pe aadha kaam hua";
   const a = { type: "done", issue: 3, quote: "login wala fix ho gaya", confidence: "high" };
-  assert.deepEqual(checkAction(a, [3, 4], said), { verified: true, knownIssue: true, tick: true });
+  assert.deepEqual(checkAction(a, [3, 4], said), { verified: true, knownIssue: true, risky: false, tick: true });
+});
+
+test("standup actions: links or @mentions you didn't say are flagged and left unticked", () => {
+  const said = "login wala fix ho gaya, menu pe aadha kaam hua";
+  const planted = { type: "progress", issue: 3, quote: "menu pe aadha kaam hua", confidence: "high", note: "Half done, details at https://evil.example and cc @someone" };
+  assert.deepEqual(checkAction(planted, [3], said), { verified: true, knownIssue: true, risky: true, tick: false });
+  const spoken = "ask @priya to review, menu pe aadha kaam hua";
+  assert.equal(checkAction({ ...planted, note: "Half done, asked @priya to review" }, [3], spoken).risky, false);
 });
 
 test("standup actions: unknown issue, unsaid quote or a low-confidence close stay unticked", () => {
