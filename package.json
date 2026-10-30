@@ -1,7 +1,7 @@
 {
   "name": "talktickets",
   "version": "1.0.0",
-  "description": "Say your plan out loud; get clean, verified GitHub issues. Built by voice with Wispr Flow.",
+  "description": "Say your plan out loud; get clean, verified GitHub issues. Made to be used hands-free with Wispr Flow.",
   "type": "module",
   "private": true,
   "scripts": {

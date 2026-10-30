@@ -3,8 +3,10 @@
 **Talk through the work. GitHub keeps up.**
 
 Plan, standup and share by voice. TalkTickets keeps your GitHub issues up to date from what you say, and traces every
-change back to your own words. Built by voice with [Wispr Flow](https://wisprflow.ai) for the WeMakeDevs **No Hands**
-challenge (Builders track).
+change back to your own words. Made to be used hands-free with [Wispr Flow](https://wisprflow.ai), for the WeMakeDevs
+**No Hands** challenge (Builders track).
+
+**Demo video (under 2 minutes):** see the submission. **Live:** https://talktickets.vercel.app
 
 ## The problem
 I'm a student running two or three projects and hackathons at once. Issues are the easy part. Keeping them **up to
@@ -91,8 +93,24 @@ TalkTickets planned and tracked its own last features, on this repo, by voice:
 - **Share:** the week's X post, LinkedIn post and changelog, written from that activity (2 closed, 3 open).
 
 ## How I used Wispr Flow
-<!-- Fill in honestly before submitting: what you dictated, and roughly how much. -->
-- Wispr usage card: see the submission.
+Everything TalkTickets did on this repo started as speech. I held the Wispr key and talked into the app:
+- **The plan** (79 words), the answer to its questions, and **two standups** (44 and 51 words).
+- **The commands:** "apply all", "switch to standup", "read my issues", "this week", "copy the post", "show the log".
+
+What I learned:
+- **Wispr already cleans up speech.** It dropped my "um"s and "uh"s and even turned the plan into a list, so TalkTickets'
+  own filler marking found nothing to strike out. The truth guard still checks every ticket against the cleaned text.
+- **Mishearings happen, so commands must never guess.** Wispr once heard "show the log" as "show dialog". The command bar
+  refused it instead of guessing, and I said it again.
+- **Voice is fast.** At 153 words a minute, saying the whole standup took seconds; typing those updates into four issues
+  by hand is the job that never got done.
+
+My Wispr Flow usage card (Insights, October 30, 2026):
+
+![Wispr Flow Insights: 153 words per minute, 1,279 words dictated, 785 fixes made by Flow](docs/wispr-insights.png)
+
+The code itself was written with an AI coding assistant. I'm not claiming it was all dictated; the voice part is how
+TalkTickets is used.
 
 ## Run it
 Requires Node 18+ and a free [Gemini API key](https://aistudio.google.com/apikey). No dependencies to install.
