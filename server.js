@@ -2,13 +2,15 @@
 // Run: node server.js   (needs GEMINI_API_KEY in the environment)
 import { createServer } from "node:http";
 import { readFile } from "node:fs/promises";
-import { extname, join, normalize } from "node:path";
+import { extname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { plan } from "./api/plan.js";
 
 const ROOT = fileURLToPath(new URL(".", import.meta.url));
 const TYPES = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".json": "application/json" };
 const PORT = process.env.PORT || 5173;
+// Only these files are public; everything else (server code, .env, logs) is never served.
+const PUBLIC = new Set(["/index.html", "/app.js", "/style.css", "/lib/text.js"]);
 
 createServer(async (req, res) => {
   const send = (status, body, type = "application/json") => {
@@ -25,11 +27,7 @@ createServer(async (req, res) => {
       return send(e.status && e.status < 600 ? e.status : 500, { error: e.message });
     }
   }
-  const path = normalize(req.url.split("?")[0] === "/" ? "/index.html" : req.url.split("?")[0]);
-  if (path.includes("..") || path.startsWith("\\api") || path.startsWith("/api") || path.endsWith(".env")) return send(404, "Not found", "text/plain");
-  try {
-    send(200, await readFile(join(ROOT, path), "utf8"), TYPES[extname(path)] || "text/plain");
-  } catch {
-    send(404, "Not found", "text/plain");
-  }
-}).listen(PORT, () => console.log(`TalkTickets on http://localhost:${PORT}`));
+  const path = req.url.split("?")[0] === "/" ? "/index.html" : req.url.split("?")[0];
+  if (!PUBLIC.has(path)) return send(404, "Not found", "text/plain");
+  send(200, await readFile(join(ROOT, path), "utf8"), TYPES[extname(path)]);
+}).listen(PORT, "127.0.0.1", () => console.log(`TalkTickets on http://localhost:${PORT}`));

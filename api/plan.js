@@ -63,11 +63,35 @@ function buildPrompt({ transcript, answers, tickets, instruction, existing }) {
   return p + "\nReturn JSON only.";
 }
 
+// A small per-instance limit (20 calls a minute) so one visitor can't drain the free Gemini quota.
+const calls = [];
+function allow() {
+  const now = Date.now();
+  while (calls.length && now - calls[0] > 60_000) calls.shift();
+  if (calls.length >= 20) return false;
+  calls.push(now);
+  return true;
+}
+
 export async function plan(input) {
   const key = process.env.GEMINI_API_KEY;
   if (!key) throw Object.assign(new Error("GEMINI_API_KEY is not set on the server"), { status: 500 });
-  if (!input?.transcript?.trim()) throw Object.assign(new Error("Say (or type) your plan first"), { status: 400 });
+  if (typeof input?.transcript !== "string" || !input.transcript.trim())
+    throw Object.assign(new Error("Say (or type) your plan first"), { status: 400 });
   if (input.transcript.length > 12000) throw Object.assign(new Error("That's too long; keep it under ~2,000 words"), { status: 400 });
+  // Cap every field so the endpoint can't be used to push huge prompts through the shared API key.
+  const str = (v, max) => (typeof v === "string" ? v.slice(0, max) : "");
+  input = {
+    transcript: input.transcript,
+    answers: str(input.answers, 4000),
+    instruction: str(input.instruction, 500),
+    tickets: Array.isArray(input.tickets) ? input.tickets.slice(0, 25) : [],
+    existing: Array.isArray(input.existing)
+      ? input.existing.slice(0, 100).map((i) => ({ number: Number(i?.number) || 0, title: str(i?.title, 200) }))
+      : [],
+  };
+  if (JSON.stringify(input.tickets).length > 20000) throw Object.assign(new Error("Too many tickets at once"), { status: 400 });
+  if (!allow()) throw Object.assign(new Error("Too many requests. Wait a minute and try again."), { status: 429 });
 
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`;
   const r = await fetch(url, {
