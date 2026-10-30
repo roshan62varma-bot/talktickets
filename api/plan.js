@@ -47,7 +47,8 @@ Rules:
   Ask at most 2 per ticket, in simple English. Empty if the ticket is clear.
 - "labels": 1-2 short lowercase labels from what the task is about (e.g. "docs", "bug", "demo", "setup").
 - "priority": P1 if they said it's first/urgent/blocking, P3 if "later/maybe/nice to have", else P2.
-- "duplicate_of": if an EXISTING issue (given below) is clearly the same task, its number; otherwise omit it.`;
+- "duplicate_of": if an EXISTING issue (given below) is clearly the same task, its number; otherwise omit it.
+  Still return that ticket (the person decides); never drop a task because it already exists.`;
 
 function buildPrompt({ transcript, answers, tickets, instruction, existing }) {
   let p = `${RULES}\n\nTRANSCRIPT (spoken plan):\n"""\n${transcript}\n"""\n`;

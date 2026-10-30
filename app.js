@@ -3,10 +3,15 @@ import { issueBody, markSpeech, parseRepo, quoteFound } from "./lib/text.js";
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
 
-const SAMPLE_REPO = "roshan62varma-bot/offerroom";
-const SAMPLE = `Okay so, um, for the Flip the Switch hackathon, first thing on November 4th I need to make a template yaml file so Switch Console can create all five agents and the room by itself. Then, uh, I have to record the demo again, the the whole flow, and this time add the mock interview where I answer by voice with Wispr. Basically the old video shows 29 October so it has to be redone. Matlab, also the README should honestly say the engine was built before the hackathon and the Switch setup was built during it. And maybe later, if time, add my CGPA to the resume. All of this before 7 November night.`;
+// The sample is a made-up project: a hostel mess-menu app. No real repository is read or written.
+const SAMPLE_REPO = "sample/mess-menu-app";
+const SAMPLE = `Okay so, um, the mess menu app. First thing, the login page is broken on mobile, the the button gets cut off, that has to be fixed by Friday. Then, uh, students keep asking what's for dinner, so we need today's menu right on the home screen. Basically also a way to rate each meal, like one to five stars, matlab so the mess committee sees what people hate. And maybe later, if there's time, Hindi and Tamil versions of the menu.`;
+const SAMPLE_EXISTING = [
+  { number: 14, title: "Show today's menu on the home screen", url: "#" },
+  { number: 9, title: "Add dark mode", url: "#" },
+];
 
-const state = { tickets: [], existing: [], transcript: "", answers: "" };
+const state = { tickets: [], existing: [], transcript: "", answers: "", sample: false };
 
 try {
   const saved = localStorage.getItem("tt-token");
@@ -24,11 +29,13 @@ function showSpeech(text) {
   const el = $("speech");
   if (!fillers && !repeats) { el.hidden = true; return; }
   el.hidden = false;
-  el.innerHTML = `<div class="step small">What we heard · ${fillers} filler${fillers === 1 ? "" : "s"}, ${repeats} repeat${repeats === 1 ? "" : "s"} ignored</div><p>` +
-    parts.map((p) => (p.kind ? `<s class="${p.kind}">${esc(p.text)}</s>` : esc(p.text))).join("") + "</p>";
+  const n = (k, w) => `${k} ${w}${k === 1 ? "" : "s"}`;
+  el.innerHTML = `<div class="count">Heard ${n(fillers, "filler")} and ${n(repeats, "repeat")}. They're ignored.</div><p>` +
+    parts.map((p) => (p.kind ? `<s>${esc(p.text)}</s>` : esc(p.text))).join("") + "</p>";
 }
 
 async function loadExisting(repo) {
+  if (state.sample) return SAMPLE_EXISTING;
   const r = parseRepo(repo);
   if (!r) return [];
   const token = $("token").value.trim();
@@ -47,10 +54,13 @@ async function callPlan(extra = {}) {
   const res = await fetch("/api/plan", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ transcript: state.transcript, answers: state.answers, existing: state.existing, ...extra }),
+    body: JSON.stringify({
+      transcript: state.transcript, answers: state.answers,
+      existing: state.existing.map(({ number, title }) => ({ number, title })), ...extra,
+    }),
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.error || `Server error ${res.status}`);
+  if (!res.ok) throw new Error(data.error || `The server answered ${res.status}. Try again.`);
   return data.tickets;
 }
 
@@ -60,38 +70,53 @@ function accept(tickets) {
   state.tickets = tickets.map((t) => {
     const verified = quoteFound(t.quote, source);
     const dup = t.duplicate_of ? state.existing.find((e) => e.number === t.duplicate_of) : null;
-    // unverified or duplicate tickets start unticked: the person has to choose them on purpose
+    // unverified or duplicate tickets start unticked: the person has to pick them on purpose
     const approved = prev.has(t.title) ? prev.get(t.title) : verified && !dup;
     return { ...t, verified, dup, approved };
   });
   render();
 }
 
+function ticketHTML(t, i) {
+  const pri = esc(t.priority).toLowerCase();
+  const dup = t.dup
+    ? `<p class="trace bad">Already exists as ${t.dup.url && t.dup.url !== "#" ? `<a href="${esc(t.dup.url)}" target="_blank" rel="noopener">#${t.dup.number}</a>` : `#${t.dup.number}`} ${esc(t.dup.title)}</p>`
+    : "";
+  return `
+  <article class="stub ticket ${t.approved ? "" : "off"}">
+    <div class="stub-l">
+      <b>${i + 1}</b>
+      <span class="pri ${pri}">${esc(t.priority)}</span>
+      <input type="checkbox" class="pick" data-i="${i}" ${t.approved ? "checked" : ""} aria-label="Create ticket ${i + 1}">
+    </div>
+    <div class="stub-r">
+      <h4>${esc(t.title)}</h4>
+      <p class="body">${esc(t.body)}</p>
+      <div class="facts">
+        <span><b>Done when</b> ${esc(t.done_when)}</span>
+        ${t.due ? `<span><b>Due</b> ${esc(t.due)}</span>` : ""}
+        ${t.labels.map((l) => `<span class="tag">${esc(l)}</span>`).join("")}
+      </div>
+      <p class="trace ${t.verified ? "ok" : "bad"}">${t.verified ? "You said" : "Not found in what you said"}: <q>${esc(t.quote)}</q></p>
+      ${dup}
+    </div>
+  </article>`;
+}
+
 function render() {
-  $("step-review").hidden = $("step-ship").hidden = !state.tickets.length;
-  $("tickets").innerHTML = state.tickets.map((t, i) => `
-    <article class="ticket ${t.approved ? "" : "off"}">
-      <div class="thead">
-        <label class="check"><input type="checkbox" data-i="${i}" ${t.approved ? "checked" : ""}> <b>${i + 1}. ${esc(t.title)}</b></label>
-        <span class="pill ${t.priority.toLowerCase()}">${esc(t.priority)}</span>
-      </div>
-      <p>${esc(t.body)}</p>
-      <div class="meta">
-        <span><b>Done when:</b> ${esc(t.done_when)}</span>
-        ${t.due ? `<span><b>Due:</b> ${esc(t.due)}</span>` : ""}
-        ${t.labels.map((l) => `<span class="label">${esc(l)}</span>`).join("")}
-      </div>
-      <div class="guard ${t.verified ? "ok" : "bad"}">
-        ${t.verified ? "✓ From what you said:" : "⚠ Couldn't find this in what you said:"} “${esc(t.quote)}”
-      </div>
-      ${t.dup ? `<div class="guard bad">⚠ Looks like a duplicate of <a href="${esc(t.dup.url)}" target="_blank" rel="noopener">#${t.dup.number} ${esc(t.dup.title)}</a></div>` : ""}
-    </article>`).join("");
+  const has = state.tickets.length > 0;
+  $("empty").hidden = has;
+  $("changebox").hidden = $("step-ship").hidden = !has;
+  $("tickets").innerHTML = state.tickets.map(ticketHTML).join("");
 
   const qs = state.tickets.flatMap((t, i) => t.questions.map((q) => `<li><b>Ticket ${i + 1}:</b> ${esc(q)}</li>`));
   $("ask").hidden = !qs.length;
   $("questions").innerHTML = qs.join("");
+
   const n = state.tickets.filter((t) => t.approved).length;
-  $("create").textContent = $("token").value.trim() ? `Create ${n} issue${n === 1 ? "" : "s"}` : `Dry run: ${n} issue${n === 1 ? "" : "s"}`;
+  const token = $("token").value.trim();
+  $("tokenstate").textContent = token ? "set" : "not set, so this is a dry run";
+  $("create").textContent = token ? `Create ${n} issue${n === 1 ? "" : "s"}` : `Preview ${n} issue${n === 1 ? "" : "s"}`;
 }
 
 $("tickets").addEventListener("change", (e) => {
@@ -104,6 +129,7 @@ $("sample").onclick = () => {
   $("repo").value = SAMPLE_REPO;
   $("transcript").value = SAMPLE;
   showSpeech(SAMPLE);
+  $("transcript").focus();
 };
 $("transcript").addEventListener("input", () => showSpeech($("transcript").value));
 
@@ -111,16 +137,18 @@ $("go").onclick = async () => {
   state.transcript = $("transcript").value.trim();
   state.answers = "";
   state.tickets = [];
-  if (!state.transcript) return setStatus("status", "Say your plan first.", "err");
-  try { localStorage.setItem("tt-repo", $("repo").value.trim()); } catch { /* fine */ }
+  state.sample = $("repo").value.trim() === SAMPLE_REPO;
+  if (!state.transcript) return setStatus("status", "Say your plan in the box first.", "err");
+  if (!state.sample) try { localStorage.setItem("tt-repo", $("repo").value.trim()); } catch { /* fine */ }
   showSpeech(state.transcript);
-  setStatus("status", "Listening back and writing tickets…");
+  setStatus("status", "Reading what you said and writing tickets…");
   $("go").disabled = true;
   try {
     state.existing = await loadExisting($("repo").value);
     accept(await callPlan());
-    setStatus("status", `${state.tickets.length} tickets` + (state.existing.length ? `, checked against ${state.existing.length} open issues` : ""), "ok");
-    $("step-review").scrollIntoView({ behavior: "smooth" });
+    const checked = state.existing.length ? `, checked against ${state.existing.length} open issues` : "";
+    setStatus("status", `${state.tickets.length} tickets${checked}.`, "ok");
+    if (matchMedia("(max-width: 900px)").matches) $("h-tickets").scrollIntoView({ behavior: "smooth" });
   } catch (e) {
     setStatus("status", e.message, "err");
   } finally {
@@ -128,12 +156,18 @@ $("go").onclick = async () => {
   }
 };
 
+// ?sample loads the sample and runs it, so a link alone shows the whole flow.
+if (new URLSearchParams(location.search).has("sample")) {
+  $("sample").onclick();
+  $("go").onclick();
+}
+
 async function refine(button, extra) {
   button.disabled = true;
-  setStatus("status", "Updating tickets…");
+  setStatus("status", "Updating the tickets…");
   try {
     accept(await callPlan({ tickets: state.tickets.map(({ verified, dup, approved, ...t }) => t), ...extra }));
-    setStatus("status", "Tickets updated", "ok");
+    setStatus("status", "Tickets updated.", "ok");
   } catch (e) {
     setStatus("status", e.message, "err");
   } finally {
@@ -159,13 +193,14 @@ $("create").onclick = async () => {
   const repo = parseRepo($("repo").value);
   const token = $("token").value.trim();
   const chosen = state.tickets.filter((t) => t.approved);
-  if (!repo) return setStatus("shipstatus", "Add the repo at the top first.", "err");
+  if (!repo) return setStatus("shipstatus", "Add the repository at the top first.", "err");
   if (!chosen.length) return setStatus("shipstatus", "Tick at least one ticket.", "err");
   try { $("remember").checked && token ? localStorage.setItem("tt-token", token) : localStorage.removeItem("tt-token"); } catch { /* fine */ }
 
-  if (!token) {
+  if (!token || state.sample) {
     $("created").innerHTML = chosen.map((t) => `<li><b>${esc(t.title)}</b><pre>${esc(issueBody(t))}</pre></li>`).join("");
-    return setStatus("shipstatus", "Dry run: this is exactly what would be created. Add a token to create them.", "ok");
+    const why = state.sample ? "This is the sample project, so nothing is created." : "Add a token to create them for real.";
+    return setStatus("shipstatus", `Preview: exactly what would be created. ${why}`, "ok");
   }
   $("create").disabled = true;
   $("created").innerHTML = "";
@@ -181,12 +216,12 @@ $("create").onclick = async () => {
     if (res.ok) {
       ok++;
       t.approved = false;
-      $("created").insertAdjacentHTML("beforeend", `<li>✅ <a href="${esc(data.html_url)}" target="_blank" rel="noopener">#${data.number} ${esc(data.title)}</a></li>`);
+      $("created").insertAdjacentHTML("beforeend", `<li>Created <a href="${esc(data.html_url)}" target="_blank" rel="noopener">#${data.number} ${esc(data.title)}</a></li>`);
     } else {
-      $("created").insertAdjacentHTML("beforeend", `<li>❌ ${esc(t.title)}: ${esc(data.message || res.status)}</li>`);
+      $("created").insertAdjacentHTML("beforeend", `<li>Not created: ${esc(t.title)}. GitHub said: ${esc(data.message || res.status)}</li>`);
     }
   }
   $("create").disabled = false;
   render();
-  setStatus("shipstatus", `${ok} of ${chosen.length} created`, ok === chosen.length ? "ok" : "err");
+  setStatus("shipstatus", `Created ${ok} of ${chosen.length}.`, ok === chosen.length ? "ok" : "err");
 };

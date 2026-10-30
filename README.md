@@ -19,9 +19,12 @@ chat, because turning it into proper tickets takes longer than doing the work. S
 5. **Duplicates.** It reads the repo's open issues and flags tickets that already exist.
 6. **Ship.** Tick the tickets you want and create them on GitHub with your token, or do a dry run first. Nothing is created until you approve it.
 
+## Try it
+- Open the app with `?sample` at the end of the link. It loads a made-up project (a hostel mess-menu app) and runs the whole flow, duplicate check included. Nothing is created on GitHub.
+- Or paste your own repo, talk, and press **Make tickets**.
+
 ## The result it produced
-I used it on my real plan for the Flip the Switch hackathon (Nov 4–7). The issues it created are in
-[roshan62varma-bot/offerroom/issues](https://github.com/roshan62varma-bot/offerroom/issues).
+<!-- Add the link to the real issues TalkTickets created from your spoken plan. -->
 
 ## How I used Wispr Flow
 <!-- Fill in honestly before submitting: what you dictated, and roughly how much. -->
