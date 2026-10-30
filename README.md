@@ -93,7 +93,7 @@ The whole flow, from talking to approving to posting, works without touching the
 Requires Node 18+ and a free [Gemini API key](https://aistudio.google.com/apikey). No dependencies to install.
 
 ```bash
-GEMINI_API_KEY=your_key node server.js     # http://localhost:5173
+GEMINI_API_KEY=your_key node dev-server.js     # http://localhost:5173
 npm test                                    # 29 tests: commands, truth guard, checklists, nudges, evidence, card, API flows (fake AI), OAuth
 node scripts/browser-check.mjs              # 39 checks in a real headless browser, including GitHub writes + undo against a fake GitHub
 node scripts/make-samples.js                # refresh the saved sample answers
@@ -110,7 +110,7 @@ To deploy on Vercel, import the repo and set `GEMINI_API_KEY`. The static files 
 - The voice log and the undo history live in your browser.
 
 ## How it's built
-- `index.html`, `app.js`, `style.css`: one page, no build step.
+- `index.html`, `ui.js`, `style.css`: one page, no build step.
 - `lib/github.js`: GitHub calls straight from the browser (read issues, create, comment, label, close). The token stays in your browser.
 - `lib/text.js`: filler and repeat marking, the quote check, standup action checks, post reference checks, and the issue and comment formats. It is unit-tested.
 - `lib/log.js`: the voice log (browser storage) and the Markdown export.

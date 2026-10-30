@@ -1,0 +1,4 @@
+dev-server.js
+scripts/
+test/
+*.log

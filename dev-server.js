@@ -1,5 +1,5 @@
 // Local dev server: serves the static app and the /api functions, same as Vercel does in production.
-// Run: node server.js   (needs GEMINI_API_KEY in the environment)
+// Run: node dev-server.js   (needs GEMINI_API_KEY in the environment)
 import { createServer } from "node:http";
 import { readFile } from "node:fs/promises";
 import { extname, join } from "node:path";
@@ -16,7 +16,7 @@ const PORT = process.env.PORT || 5173;
 const API = { "/api/plan": plan, "/api/standup": standup, "/api/share": share };
 const AUTH = { "/api/auth/config": config, "/api/auth/login": login, "/api/auth/callback": callback };
 // Only these files are public; everything else (server code, .env, logs) is never served.
-const PUBLIC = new Set(["/index.html", "/app.js", "/style.css", "/lib/text.js", "/lib/github.js", "/lib/log.js",
+const PUBLIC = new Set(["/index.html", "/ui.js", "/style.css", "/lib/text.js", "/lib/github.js", "/lib/log.js",
   "/lib/commands.js", "/lib/work.js", "/lib/samples.js"]);
 
 createServer(async (req, res) => {
