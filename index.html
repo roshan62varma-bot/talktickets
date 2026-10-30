@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TalkTickets</title>
+  <meta name="description" content="Say your plan out loud. Get clean, verified GitHub issues.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎙️</text></svg>">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div class="brand">🎙️ TalkTickets</div>
+    <p class="tag">Say your plan out loud. Get clean, verified GitHub issues.</p>
+  </header>
+
+  <main>
+    <section class="card" id="step-talk">
+      <div class="step">1 · Talk</div>
+      <label class="field">GitHub repo
+        <input id="repo" placeholder="owner/repo or a github.com link" autocomplete="off">
+      </label>
+      <label class="field">Your plan, spoken
+        <textarea id="transcript" rows="7"
+          placeholder="Click here, hold your Wispr Flow key and just talk: what needs doing, in any order. Rambling is fine."></textarea>
+      </label>
+      <div class="row">
+        <button id="go" class="primary">Make tickets</button>
+        <button id="sample" class="ghost">Try a sample</button>
+        <span class="status" id="status"></span>
+      </div>
+      <div id="speech" class="speech" hidden></div>
+    </section>
+
+    <section class="card" id="step-review" hidden>
+      <div class="step">2 · Review</div>
+      <p class="hint">Every ticket is checked against what you said. Anything the AI couldn't trace back to your words is flagged.</p>
+      <div id="tickets"></div>
+
+      <div id="ask" class="ask" hidden>
+        <div class="step small">Questions for you</div>
+        <ul id="questions"></ul>
+        <textarea id="answers" rows="3" placeholder="Answer by voice: hold your Wispr key and talk."></textarea>
+        <button id="answer" class="primary">Update tickets</button>
+      </div>
+
+      <div class="change">
+        <textarea id="instruction" rows="2" placeholder="Want a change? Say it: &quot;make ticket 2 a P1&quot;, &quot;merge 3 into 1&quot;…"></textarea>
+        <button id="change" class="ghost">Apply change</button>
+      </div>
+    </section>
+
+    <section class="card" id="step-ship" hidden>
+      <div class="step">3 · Ship</div>
+      <label class="field">GitHub token <span class="muted">(fine-grained, Issues: read &amp; write on this repo; stays in this browser)</span>
+        <input id="token" type="password" placeholder="github_pat_…  (leave empty for a dry run)" autocomplete="off">
+      </label>
+      <label class="check"><input type="checkbox" id="remember"> Remember the token in this browser</label>
+      <div class="row">
+        <button id="create" class="primary">Create approved issues</button>
+        <span class="status" id="shipstatus"></span>
+      </div>
+      <ul id="created" class="created"></ul>
+    </section>
+  </main>
+
+  <footer>Built by voice with <a href="https://wisprflow.ai" target="_blank" rel="noopener">Wispr Flow</a> for the WeMakeDevs No Hands challenge · <a href="https://github.com/roshan62varma-bot/talktickets" target="_blank" rel="noopener">source</a></footer>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
